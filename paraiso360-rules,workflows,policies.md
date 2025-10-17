@@ -908,7 +908,884 @@ down payment."
 
 ---
 
-## 10. Component Workflows
+## 10. Lot Ownership Transfer System
+
+### 10.1 Overview
+
+The lot ownership transfer system enables the legal transfer of lot ownership from one party to another while maintaining complete transaction integrity and administrative oversight. All transfers require administrative approval to ensure proper documentation and compliance.
+
+**Important:** Transfers are permanent actions that change legal ownership. All transfers must be thoroughly verified before approval.
+
+---
+
+### 10.2 Transfer Initiation Rules
+
+The system enforces strict requirements before allowing transfer creation:
+
+| Requirement | Rule | Purpose |
+|------------|------|---------|
+| **Valid Ownership** | Only current lot owners can initiate transfers | Prevents unauthorized transfers |
+| **Staff/Admin Access** | Transfer creation requires staff or admin privileges | Ensures proper authorization |
+| **Lot Status Check** | Only Reserved, Partial, or Sold lots can be transferred | Maintains data integrity |
+
+#### Valid Ownership Verification
+
+**System Checks:**
+1. Verify requester is listed as current lot owner
+2. Check ownership records for accuracy
+3. Validate ownership is not in dispute
+4. Confirm lot has not been forfeited
+
+**Example - Valid Transfer Request:**
+```
+Lot: PLAT-001 (Platinum)
+Current Owner: Juan dela Cruz
+Status: Partial (12 payments made)
+Requester: Juan dela Cruz
+Staff Member: Maria Santos (Authorized Staff)
+
+✓ Ownership verified
+✓ Staff authorized
+✓ Lot status eligible
+→ Transfer creation allowed
+```
+
+**Example - Invalid Transfer Request:**
+```
+Lot: GOLD-045 (Gold)
+Current Owner: Maria Garcia
+Status: Sold
+Requester: Pedro Reyes (NOT the owner)
+Staff Member: Admin User
+
+✗ Ownership verification failed
+→ Transfer creation blocked
+Error: "Only the current lot owner (Maria Garcia) can initiate this transfer"
+```
+
+---
+
+#### Staff/Admin Access Control
+
+**Authorization Levels:**
+
+**Staff Members (Can):**
+- Create transfer requests on behalf of owners
+- Submit transfer documentation
+- View transfer status
+- Assist with transfer process
+
+**Staff Members (Cannot):**
+- Approve or reject transfers
+- Modify approved/rejected transfers
+- Override ownership verification
+
+**Administrators (Can):**
+- All staff capabilities
+- Approve transfer requests
+- Reject transfer requests
+- View complete transfer history
+- Cancel pending transfers
+- Document decision rationale
+
+**Example Authorization Flow:**
+```
+Step 1: Owner visits office
+Step 2: Staff verifies owner identity
+Step 3: Staff creates transfer request in system
+Step 4: System validates ownership
+Step 5: Transfer status → Pending
+Step 6: Admin reviews and decides
+Step 7: System executes decision
+```
+
+---
+
+#### Lot Status Eligibility
+
+**Eligible Statuses:**
+
+| Status | Can Transfer? | Considerations |
+|--------|---------------|----------------|
+| **Available** | ❌ No | No ownership exists |
+| **Reserved** | ✅ Yes | Transfer includes reservation rights |
+| **Partial** | ✅ Yes | Transfer includes payment obligations |
+| **Sold** | ✅ Yes | Full ownership transfer |
+
+**Transfer Implications by Status:**
+
+**Reserved Status Transfer:**
+```
+Original Situation:
+- Lot reserved by Owner A
+- 30-minute timer active
+- No payments made yet
+
+Transfer Request:
+- Owner A → Owner B
+- Reservation timer preserved
+- Owner B assumes reservation
+
+Post-Approval:
+- Reservation continues under Owner B
+- Timer not reset
+- Owner B must complete initial payment
+```
+
+**Partial Status Transfer:**
+```
+Original Situation:
+- Lot: ₱120,000 Platinum
+- Paid: ₱45,000 (3 installments)
+- Remaining: ₱75,000
+- Schedule: 21 payments left
+- Warning Level: Level 1 (Active)
+
+Transfer Request:
+- Owner A → Owner B
+- Payment obligation transfers
+- Schedule continues
+
+Post-Approval:
+- Owner B assumes all payment obligations
+- Payment schedule maintained
+- Warning level transferred
+- Payment history preserved
+- New owner responsible for future payments
+```
+
+**Sold Status Transfer:**
+```
+Original Situation:
+- Lot: ₱150,000 Diamond
+- Fully paid
+- No outstanding balance
+- Owner A holds title
+
+Transfer Request:
+- Owner A → Owner B
+- Clean title transfer
+
+Post-Approval:
+- Complete ownership to Owner B
+- All rights transferred
+- Payment history archived
+- New title issued
+```
+
+---
+
+### 10.3 Approval Requirements
+
+All transfers must pass through administrative review with strict approval protocols:
+
+#### Admin Authority
+
+**Exclusive Admin Powers:**
+- **Approve Transfers:** Grant ownership change
+- **Reject Transfers:** Deny ownership change
+- **Review Documentation:** Verify all supporting documents
+- **Request Additional Info:** Ask for clarification
+- **Document Decisions:** Record approval/rejection reasons
+
+**Decision Timeline:**
+- No automatic approvals
+- Manual review required for every transfer
+- Recommended review time: 24-48 hours
+- Urgent cases: Same-day review available
+
+---
+
+#### Pending Status Protection
+
+**System Rules:**
+```
+Only transfers with "Pending" status can be:
+- Approved by admin
+- Rejected by admin
+- Cancelled by admin
+
+Transfers with other statuses are locked:
+- Approved → Cannot modify
+- Rejected → Cannot reprocess
+- Cancelled → Cannot revive
+```
+
+**Example - Status Lock:**
+```
+Scenario 1: Attempting to re-approve
+Transfer ID: TRF-2024-001
+Status: Approved
+Action: Admin tries to approve again
+
+System Response:
+✗ "Transfer already approved on Oct 15, 2024
+  Cannot modify approved transfers"
+
+Scenario 2: Attempting to process rejected transfer
+Transfer ID: TRF-2024-002
+Status: Rejected
+Action: Admin tries to approve
+
+System Response:
+✗ "Transfer was rejected on Oct 16, 2024
+  Reason: Incomplete documentation
+  Please create new transfer request if needed"
+```
+
+---
+
+#### Automatic Ownership Update
+
+**Upon Approval, System Automatically:**
+
+1. **Update Lot Records**
+   - Change owner name
+   - Update contact information
+   - Transfer ownership date
+   - Archive previous owner data
+
+2. **Transfer Payment Obligations**
+   - Assign schedule to new owner
+   - Update payment contact
+   - Transfer penalty responsibility
+   - Maintain warning level status
+
+3. **Update Financial Records**
+   - Link payments to new owner
+   - Transfer balance responsibility
+   - Update billing information
+   - Preserve payment history
+
+4. **Generate Documentation**
+   - Create transfer certificate
+   - Issue new ownership documents
+   - Archive transfer approval
+   - Send in-app notifications
+
+**Example - Automatic Update Flow:**
+```
+Transfer Approved: Oct 20, 2024 10:30 AM
+
+Immediate System Actions:
+1. Lot PLAT-015 Owner: Juan Cruz → Maria Santos
+2. Contact updated: maria.santos@email.com
+3. Schedule reassigned: 18 remaining payments
+4. Balance: ₱76,500 now under Maria Santos
+5. Warning Level: Level 1 (Active) - maintained
+6. Payment history: Preserved and linked
+7. Transfer certificate: Generated (TRF-CERT-2024-001)
+
+Notifications Sent (In-App):
+- To Juan Cruz: "Transfer approved - ownership transferred"
+- To Maria Santos: "Welcome! You are now the owner of Lot PLAT-015"
+- To Admin: "Transfer TRF-2024-001 completed successfully"
+```
+
+---
+
+#### Reason Recording
+
+**All decisions require documented rationale:**
+
+**Approval Reasons (Examples):**
+- "All documentation verified and complete"
+- "Ownership transfer validated with legal documents"
+- "Family inheritance - death certificate provided"
+- "Sale agreement reviewed and approved"
+
+**Rejection Reasons (Examples):**
+- "Incomplete documentation - missing ID verification"
+- "Outstanding balance disputes unresolved"
+- "Current owner identity not verified"
+- "Legal documentation insufficient"
+- "Pending legal issues on the lot"
+
+**System Requirements:**
+- Minimum 20 characters for reason
+- Cannot use generic reasons repeatedly
+- Must be specific to the case
+- Cannot approve/reject without reason
+- Reason permanently recorded
+
+**Example Documentation:**
+```
+Transfer Request: TRF-2024-045
+From: Pedro Reyes → Ana Reyes
+Lot: GOLD-032
+Status: Partial (₱35,000 paid, ₱40,000 remaining)
+
+Admin Review:
+Date: Oct 18, 2024
+Reviewer: Admin Maria Cruz
+Decision: APPROVED
+
+Reason:
+"Transfer approved. Family transfer verified with:
+- Marriage certificate provided
+- Both parties present at office
+- Photo IDs verified
+- Payment responsibility acknowledged by Ana Reyes
+- All required signatures obtained
+- No outstanding disputes"
+
+Documentation Attached:
+- Marriage certificate (scan)
+- Pedro Reyes ID (scan)
+- Ana Reyes ID (scan)
+- Transfer agreement (signed)
+```
+
+---
+
+### 10.4 Transfer Status Definitions
+
+The system uses four distinct statuses to track transfer lifecycle:
+
+| Status | Meaning | Possible Next Actions | Can Modify? |
+|--------|---------|----------------------|-------------|
+| **Pending** | Awaiting admin review | Approve, Reject, Cancel | Yes (Admin only) |
+| **Approved** | Transfer completed successfully | None (Final) | No |
+| **Rejected** | Transfer denied by admin | Create new request | No |
+| **Cancelled** | Transfer cancelled before processing | Create new request | No |
+
+---
+
+#### Pending Status
+
+**Definition:** Transfer request submitted and awaiting administrative review
+
+**Characteristics:**
+- Initial status for all new transfers
+- Open for admin decision
+- Can be approved or rejected
+- Can be cancelled by admin
+- No ownership changes yet
+
+**Available Actions:**
+- Admin: Approve, Reject, Cancel
+- Staff: View, add documentation
+- Owner: View status
+
+**Example:**
+```
+Transfer: TRF-2024-078
+Created: Oct 18, 2024 9:15 AM
+From: Jose Santos
+To: Linda Santos
+Lot: PLAT-023 (Partial - ₱88,000 paid)
+Status: PENDING
+Days Pending: 2 days
+
+Admin Dashboard Shows:
+🟡 Pending Review
+📄 Documents: 3 attached
+📝 Staff Notes: "Family transfer - daughter taking over payments"
+⏰ Pending Since: 2 days ago
+👤 Assigned Reviewer: [Not assigned]
+
+Actions Available:
+[✅ Approve] [❌ Reject] [⚫ Cancel]
+```
+
+---
+
+#### Approved Status
+
+**Definition:** Transfer has been approved and ownership has been changed
+
+**Characteristics:**
+- Final status (cannot be changed)
+- Ownership already transferred
+- System updates completed
+- New owner now responsible
+- Original transfer request locked
+
+**Available Actions:**
+- All users: View only
+- System: No modifications allowed
+
+**Approval Effects:**
+1. Lot ownership record updated
+2. Payment schedules reassigned
+3. Balance responsibility transferred
+4. Warning level maintained
+5. Transfer certificate generated
+6. In-app notifications sent
+7. Audit log entry created
+
+**Example:**
+```
+Transfer: TRF-2024-078
+Created: Oct 18, 2024 9:15 AM
+Approved: Oct 20, 2024 11:45 AM
+From: Jose Santos
+To: Linda Santos
+Lot: PLAT-023
+Status: APPROVED ✅
+
+Approval Details:
+Approved By: Admin Maria Cruz
+Approval Date: Oct 20, 2024 11:45 AM
+Reason: "All documentation verified. Family transfer 
+         approved with payment acknowledgment signed."
+
+Post-Approval State:
+Current Owner: Linda Santos
+Balance: ₱32,000 remaining
+Schedule: 8 payments left
+Warning Level: Level 1 (Active)
+Next Payment Due: Nov 1, 2024
+
+🔒 Transfer completed and locked
+```
+
+---
+
+#### Rejected Status
+
+**Definition:** Transfer request has been denied by administrator
+
+**Characteristics:**
+- Final status (cannot be changed)
+- No ownership change occurred
+- Original owner retained
+- Documented reason required
+- Can create new request if issues resolved
+
+**Available Actions:**
+- All users: View rejection reason
+- Admin: Cannot modify
+- Staff: Can create new transfer if appropriate
+
+**Rejection Reasons:**
+- Documentation issues
+- Verification failures
+- Unresolved disputes
+- Legal complications
+- Missing information
+
+**Example:**
+```
+Transfer: TRF-2024-082
+Created: Oct 17, 2024 2:30 PM
+Rejected: Oct 19, 2024 10:20 AM
+From: Carlos Mendoza
+To: Unknown Recipient
+Lot: DIAM-008
+Status: REJECTED ❌
+
+Rejection Details:
+Rejected By: Admin Roberto Cruz
+Rejection Date: Oct 19, 2024 10:20 AM
+Reason: "Transfer rejected due to incomplete documentation.
+         Missing:
+         - Recipient's valid ID
+         - Notarized transfer agreement
+         - Payment acknowledgment form
+         
+         Please resubmit with complete documents."
+
+Current State:
+Owner: Carlos Mendoza (unchanged)
+Lot Status: Partial
+Balance: ₱112,500 remaining
+
+Action Required:
+Staff can create new transfer request once 
+documents are complete.
+```
+
+---
+
+#### Cancelled Status
+
+**Definition:** Transfer request withdrawn before processing
+
+**Characteristics:**
+- Transfer stopped before approval/rejection
+- No ownership change
+- Original owner retained
+- Less formal than rejection
+- Can be cancelled by admin
+
+**Common Cancellation Reasons:**
+- Owner changed mind
+- Duplicate request
+- Error in transfer details
+- Alternative resolution found
+- Request withdrawn by owner
+
+**Example:**
+```
+Transfer: TRF-2024-090
+Created: Oct 18, 2024 4:00 PM
+Cancelled: Oct 18, 2024 5:15 PM
+From: Ana Garcia
+To: Pedro Garcia
+Lot: GOLD-045
+Status: CANCELLED ⚫
+
+Cancellation Details:
+Cancelled By: Admin Juan Reyes
+Cancellation Date: Oct 18, 2024 5:15 PM
+Reason: "Owner requested cancellation - decided to 
+         handle transfer through legal process instead.
+         May resubmit after legal documents finalized."
+
+Current State:
+Owner: Ana Garcia (unchanged)
+Lot Status: Sold
+No further action on this transfer request.
+
+Note: New transfer can be created if needed.
+```
+
+---
+
+### 10.5 Transfer Process Workflow
+
+**Complete step-by-step transfer process:**
+
+#### Step 1: Transfer Initiation
+
+**Prerequisites:**
+```
+✓ Current owner verified
+✓ Staff/Admin authorized
+✓ Lot status eligible (Reserved/Partial/Sold)
+✓ Required documents prepared
+```
+
+**Actions:**
+1. Staff logs into system
+2. Searches for lot by number or owner
+3. Clicks "Initiate Transfer"
+4. System validates eligibility
+5. Staff enters transfer details:
+   - New owner information
+   - Contact details
+   - Reason for transfer
+   - Supporting documents
+6. System creates transfer record
+7. Status set to "Pending"
+8. In-app notification sent to admin
+
+**Example Entry:**
+```
+Transfer Request Creation:
+Lot: PLAT-025
+Current Owner: Maria Santos
+New Owner: Carlos Santos
+Relationship: Spouse
+Transfer Reason: Family arrangement
+Documents Attached: 2 files
+Created By: Staff Member - Ana Cruz
+Status: Pending
+
+In-App Notification Sent To:
+- All Administrators
+- Original Owner (Maria Santos)
+```
+
+---
+
+#### Step 2: Admin Review
+
+**Admin Dashboard View:**
+```
+New Transfer Request
+TRF-2024-095
+🟡 Pending Review - 0 days old
+
+Lot Details:
+Number: PLAT-025
+Classification: Platinum (₱120,000)
+Status: Partial
+Balance: ₱54,000 remaining
+
+Transfer Details:
+From: Maria Santos
+To: Carlos Santos
+Reason: Family arrangement
+Documents: 2 attached
+
+Actions:
+[View Documents] [Approve] [Reject] [Cancel]
+```
+
+**Review Checklist:**
+- [ ] Verify current owner identity
+- [ ] Review all attached documents
+- [ ] Check lot payment status
+- [ ] Verify new owner information
+- [ ] Review any outstanding issues
+- [ ] Confirm transfer reason legitimacy
+- [ ] Check for legal complications
+
+---
+
+#### Step 3: Admin Decision
+
+**Option A: Approval**
+
+**Admin Actions:**
+1. Reviews all documentation
+2. Verifies compliance
+3. Clicks "Approve"
+4. Enters approval reason (required)
+5. Confirms decision
+
+**System Actions:**
+1. Changes transfer status to "Approved"
+2. Updates lot owner to Carlos Santos
+3. Transfers payment schedule
+4. Updates contact information
+5. Generates transfer certificate
+6. Records approval in audit log
+7. Sends in-app notifications:
+   - To Maria Santos: "Transfer approved"
+   - To Carlos Santos: "You are now the owner"
+   - To Staff Member: "Transfer completed"
+   - To Admin: "Transfer successful"
+
+**Option B: Rejection**
+
+**Admin Actions:**
+1. Identifies issues
+2. Clicks "Reject"
+3. Enters detailed rejection reason (required)
+4. Confirms decision
+
+**System Actions:**
+1. Changes transfer status to "Rejected"
+2. Records rejection reason
+3. Preserves original ownership
+4. Sends in-app notifications:
+   - To Maria Santos: "Transfer rejected - [reason]"
+   - To Staff Member: "Transfer rejected - [reason]"
+   - To Admin: "Transfer rejected successfully"
+
+**Option C: Cancellation**
+
+**Admin Actions:**
+1. Determines cancellation needed
+2. Clicks "Cancel"
+3. Enters cancellation reason
+4. Confirms decision
+
+**System Actions:**
+1. Changes transfer status to "Cancelled"
+2. Records cancellation reason
+3. Preserves original ownership
+4. Sends in-app notifications
+5. Archives transfer request
+
+---
+
+### 10.6 Notification System (In-App Only)
+
+**All transfer notifications are delivered through in-app notification center only. No email or SMS notifications.**
+
+#### Notification Types
+
+**Transfer Created:**
+```
+📬 New Transfer Request
+Transfer ID: TRF-2024-095
+Lot: PLAT-025
+From: Maria Santos → Carlos Santos
+Status: Pending Admin Review
+Created: Oct 20, 2024 10:30 AM
+
+Action Required: Admin review needed
+[View Details]
+```
+
+**Transfer Approved:**
+```
+✅ Transfer Approved
+Transfer ID: TRF-2024-095
+Lot: PLAT-025 is now owned by Carlos Santos
+Previous Owner: Maria Santos
+Approved: Oct 22, 2024 2:15 PM
+Approved By: Admin Juan Cruz
+
+Your new ownership is now active.
+[View Transfer Certificate]
+```
+
+**Transfer Rejected:**
+```
+❌ Transfer Rejected
+Transfer ID: TRF-2024-096
+Lot: GOLD-033
+Reason: Incomplete documentation - missing recipient ID
+
+Action Required: Please provide missing documents
+and resubmit transfer request.
+[View Rejection Details]
+```
+
+**Transfer Cancelled:**
+```
+⚫ Transfer Cancelled
+Transfer ID: TRF-2024-097
+Lot: DIAM-015
+Reason: Owner request - handling through legal process
+
+No further action on this request.
+[View Details]
+```
+
+#### Notification Recipients
+
+| Event | Current Owner | New Owner | Staff Member | Admin |
+|-------|---------------|-----------|--------------|-------|
+| Transfer Created | ✅ Notified | ❌ No | ✅ Notified | ✅ Notified |
+| Transfer Approved | ✅ Notified | ✅ Notified | ✅ Notified | ✅ Notified |
+| Transfer Rejected | ✅ Notified | ❌ No | ✅ Notified | ✅ Notified |
+| Transfer Cancelled | ✅ Notified | ❌ No | ✅ Notified | ✅ Notified |
+
+---
+
+### 10.7 Transfer Impact on Payment Obligations
+
+#### Payment Schedule Transfer
+
+**When transfer is approved:**
+
+**Pre-Need Installments:**
+```
+Before Transfer:
+Owner: Juan Santos
+Schedule: 15 remaining payments
+Monthly: ₱4,250
+Next Due: Nov 1, 2024
+Warning Level: Level 1
+
+After Transfer:
+Owner: Maria Santos (NEW)
+Schedule: 15 remaining payments (unchanged)
+Monthly: ₱4,250 (unchanged)
+Next Due: Nov 1, 2024 (unchanged)
+Warning Level: Level 1 (maintained)
+
+New owner assumes all payment obligations immediately.
+```
+
+**At-Need Remaining Payment:**
+```
+Before Transfer:
+Owner: Pedro Cruz
+At-Need: ₱225,000 total
+Paid: ₱168,750 (75%)
+Remaining: ₱56,250
+Due: 72 hours from initial (Oct 25, 10 AM)
+
+After Transfer (Oct 23, 2 PM):
+Owner: Ana Cruz (NEW)
+Remaining: ₱56,250 (unchanged)
+Due: Oct 25, 10 AM (unchanged - 44 hours left)
+New owner must complete payment within remaining time.
+```
+
+---
+
+#### Warning Level Preservation
+
+**System maintains warning levels through transfers:**
+
+**Example:**
+```
+Transfer During Overdue Period:
+
+Original Situation:
+Owner: Carlos Mendoza
+Warning Level: Level 4 (First Warning)
+Days Overdue: 45 days
+Penalty: ₱4,500
+Balance: ₱52,000
+
+Transfer Approved:
+New Owner: Linda Mendoza
+Warning Level: Level 4 (maintained)
+Days Overdue: 45 days (continues)
+Penalty: ₱4,500 (transferred)
+Balance: ₱52,000 (transferred)
+
+Important: New owner inherits the overdue status
+and must address penalties immediately.
+```
+
+---
+
+### 10.8 Best Practices & Guidelines
+
+**For Staff Members:**
+
+1. **Verify Identity Thoroughly**
+   - Check government-issued IDs
+   - Confirm ownership in system
+   - Match signatures
+   - Document verification process
+
+2. **Complete Documentation**
+   - Collect all required documents
+   - Scan clearly
+   - Attach to transfer request
+   - Note any missing items
+
+3. **Clear Communication**
+   - Explain transfer process to owners
+   - Set realistic timelines
+   - Provide status updates
+   - Answer questions clearly
+
+4. **Accurate Data Entry**
+   - Double-check new owner details
+   - Verify contact information
+   - Review payment status
+   - Confirm lot details
+
+**For Administrators:**
+
+1. **Thorough Review**
+   - Review all documentation
+   - Verify authenticity
+   - Check for inconsistencies
+   - Consult legal if needed
+
+2. **Timely Processing**
+   - Review within 24-48 hours
+   - Don't let requests accumulate
+   - Prioritize urgent cases
+   - Communicate delays
+
+3. **Detailed Reasoning**
+   - Provide specific approval reasons
+   - Explain rejections clearly
+   - Document decision factors
+   - Maintain consistency
+
+4. **Monitor Post-Transfer**
+   - Verify ownership update
+   - Check payment reassignment
+   - Confirm notification delivery
+   - Address any issues quickly
+
+**Security Considerations:**
+
+- All transfers require multi-factor authentication
+- Document all access and changes
+- Maintain complete audit trail
+- Protect sensitive owner information
+- Secure transfer documentation
+- Monitor for fraudulent requests
+
+---
+
+## 11. Component Workflows
 
 ### 9.1 ReserveLot Component (LOT-004)
 
@@ -1097,7 +1974,6 @@ Each classification can configure:
 
 ## Document Control
 
-**Version:** 2.0 
-**Last Updated:** 10/17/2025
-**Maintained By:** Erick 
-
+**Version:** 3.0
+**Last Updated:**  10/18/2025  
+**Maintained By:** Erick
