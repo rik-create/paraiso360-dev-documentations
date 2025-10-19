@@ -1971,9 +1971,3 @@ Each classification can configure:
 | Other Non-Cash | Manual | Yes |
 
 ---
-
-## Document Control
-
-**Version:** 3.0
-**Last Updated:**  10/18/2025  
-**Maintained By:** Erick
